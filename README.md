@@ -29,6 +29,27 @@
 This tool is meant to work in concert with [Kraken](https://github.com/samsung-cnct/kraken). It will help manage 
 clusters above the cluster, IE master instances.
   
+## Prerequisites
+
+  Requires:
+
+  * bash
+  * jq
+  * yaml2json (included)
+  * ruby (system base install)
+
+
+## Successfully Tested on
+
+  * Linux
+  * MacOS
+
+  But will likely need more wide-spread testing
+
+## Needs
+
+  * build tests
+
 ## Examples
 
 List environments:
@@ -40,7 +61,7 @@ List environments:
   (currently select environment is marked with a '*')
 
       cyklopsdev
-  \*  user-test
+   *  user-test
 ```
 
 Create a new environment:
@@ -78,7 +99,7 @@ Create a new environment:
 
       tcyklopsdev
       user-est
-  \*  some-new-env
+   *  some-new-env
 
   $ grep --context 2 -P '^\s+- name: some-new-env' $KRAKEN/config.yaml
    deployment:
