@@ -7,11 +7,11 @@ then
 # This cp will not clobber any
 # existing files without explicit
 # permission.
-  if cp -iavp bin/* ~/bin
+  if cp -iavp bin/* $HOME/bin
   then
     echo "Files installed successfully..."
 
-    if ! echo $PROFILE | grep -c install_skopos
+    if ! grep -c install_skopos $PROFILE
     then
       cat <<E >> $HOME/.profile
 
