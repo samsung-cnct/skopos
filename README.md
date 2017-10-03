@@ -29,3 +29,81 @@
 This tool is meant to work in concert with [Kraken](https://github.com/samsung-cnct/kraken). It will help manage 
 clusters above the cluster, IE master instances.
   
+## Examples
+
+List environments:
+
+```
+  $ skopos ls
+
+  The following kraken environment(s) exist...
+  (currently select environment is marked with a '*')
+
+      cyklopsdev
+  \*  user-test
+```
+
+Create a new environment:
+
+```
+  $ skopos cr some-new-env
+  '/home/user/.kraken' -> '/home/user/.kraken-some-new-env'
+  Attempting to generate configuration at: /home/user/.kraken/config.yaml 
+  Pulling image 'quay.io/samsung_cnct/k2:v0.1' ██████████ Complete
+  Generating cluster config cluster-name-missing █████▒▒▒▒▒ Complete
+  Generated aws config at /home/user/.kraken/config.yaml 
+  Created /home/user/.kraken-some-new-env and switched to it. You're all set.
+  Cluster path found: some-new-env. Exports set. Alias for kssh created.
+```
+
+ * automatically sets your environemt up:
+
+```
+  $ printenv | grep -P 'KUBE|HELM|KRAK|K2'
+  KUBECONFIG=/home/user/.kraken/some-new-env/admin.kubeconfig
+  HELM_HOME=/home/user/.kraken/some-new-env/.helm
+  K2OPTS=-v /home/user/.kraken:/home/user/.kraken
+  KRAKEN=/home/user/.kraken
+```
+
+ * Creating a new environment sets your environment
+   to the just created env. Your kraken config name
+   is automatically set to the same.
+
+```
+  $ skopos ls
+
+  The following kraken environment(s) exist...
+  (currently select environment is marked with a '*')
+
+      tcyklopsdev
+      user-est
+  \*  some-new-env
+
+  $ grep --context 2 -P '^\s+- name: some-new-env' $KRAKEN/config.yaml
+   deployment:
+     clusters:
+       - name: some-new-env
+     	  network: 10.32.0.0/12
+      	  dns: 10.32.0.2
+```
+
+Switch between environments atomically:
+
+```
+  $ skopos sw cyklopsdev
+  /home/user/.kraken' -> '/home/user/.kraken-cyklopsdev'
+  Cluster path found: cyklopsdev. Exports set. Alias for kssh created.
+```
+  
+ * Resetting your environment to the newly requested environment
+
+```
+  $ printenv | grep -P 'KUBE|HELM|KRAK|K2'
+  KUBECONFIG=/home/user/.kraken/cyklopsdev/admin.kubeconfig
+  HELM_HOME=/home/user/.kraken/cyklopsdev/.helm
+  K2OPTS=-v /home/user/.kraken:/home/user/.kraken
+  KRAKEN=/home/user/.kraken
+```
+
+`skopos rm <env>` prints an informative message on how to remove environments.
