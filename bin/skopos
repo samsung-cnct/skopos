@@ -20,16 +20,28 @@ kraken_env()
 	 SSH_KEY SSH_PUB K2OPTS 
 }
 
+cluster_name()
+{
+# only bad thing about this is that it relies on the name of the config to be "config.yaml"
+# hmmmm.
+  clname=$(< $KRAKEN/config.yaml yaml2json - | jq -rc '.deployment.clusters[0].name')
+
+  if [[ $clname == "null" ]]
+  then
+    # try this for commontools cluster:
+    clname=$(< $KRAKEN/config.yaml yaml2json - | jq -rc '.deployment.cluster')
+  fi
+
+  echo $clname
+}
+
 cluster_path()
 {
   if [[ -d "$KRAKEN" || -s "$KRAKEN" ]]
   then
-    #cluster_cfg=$(basename $(find $KRAKEN/ -maxdepth 1 -type d -not \( -path $KRAKEN/ \)) 2>/dev/null)
-# only bad thing about this is that it relies on the name of the config to be "config.yaml"
-# hmmmm.
-    clname=$(< $KRAKEN/config.yaml yaml2json - | jq -rc '.deployment.clusters[0].name')
+    #cluster_cfg=$(basename $(find $KRAKEN/ -maxdepth 1 -type d -not \( -path $KRAKEN/ \) -name 'admin.kubeconfig') 2>/dev/null)
 
-    export CLUSTER_NAME="$clname"
+    export CLUSTER_NAME="$(cluster_name)"
 
     if [[ -z "$CLUSTER_NAME" || "$clname" == "null" ]]
     then
