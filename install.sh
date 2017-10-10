@@ -1,6 +1,7 @@
 #!/bin/sh
 
 PROFILE="$HOME/.profile"
+INSTALLED_STR="install_skopos"
 
 if mkdir -p $HOME/bin 2>/dev/null
 then
@@ -11,13 +12,14 @@ then
   then
     echo "Files installed successfully..."
 
-    if ! grep -c install_skopos $PROFILE
+    if grep -c "$INSTALLED_STR" $PROFILE
     then
       cat <<E >> $HOME/.profile
 
-## install_skopos
+## $INSTALLED_STR
 if [[ -e $HOME/bin/skopos ]]
 then
+  echo "Setting up kraken environment..."
   source $HOME/bin/skopos
   setup_cluster_env
 fi
