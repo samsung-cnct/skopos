@@ -77,6 +77,22 @@ Create a new environment:
   Cluster path found: some-new-env. Exports set. Alias for kssh created.
 ```
 
+ * Kraken supports AWS and GKE as well as future support for other providers
+   by specifying the `--provider` argument to `generate`. _skopos_ allows you 
+   to pass the `--provider` flag on to `kraken` during the `create` process.
+
+```
+  $ alias sk='skopos'
+  $ sk cr foo-gke -- --provider=gke
+  '/home/jimconn/.kraken' -> '/home/jimconn/.kraken-foo-gke'
+  Attempting to generate configuration at: /home/jimconn/.kraken/config.yaml
+  Pulling image 'quay.io/samsung_cnct/k2:v0.1' ███▒▒▒▒▒▒▒ Complete
+  Generating cluster config cluster-name-missing █████▒▒▒▒▒ Complete
+  Generated aws config at /home/jimconn/.kraken/config.yaml
+  Created /home/jimconn/.kraken-foo-gke and switched to it. You're all set.
+  Cluster path found: foo-gke. Exports set. Alias for kssh created.
+```
+
  * automatically sets your environemt up:
 
 ```
@@ -92,7 +108,8 @@ Create a new environment:
    is automatically set to the same.
 
 ```
-  $ skopos ls
+  $ alias sk='skopos'
+  $ sk ls
 
   The following kraken environment(s) exist...
   (currently select environment is marked with a '*')
@@ -128,3 +145,44 @@ Switch between environments atomically:
 ```
 
 `skopos rm <env>` prints an informative message on how to remove environments.
+
+
+## All The Things...
+
+Skopos maintains the directory structure of clusters created (minimally), and 
+it expects certain files and directories to exist to function properly.
+
+  * The kraken cluster configuration is expected to be:
+    `$HOME/<user>/.kraken/config.yaml`
+
+  * Any directories patterned after `$HOME/<user>/.kraken-<something>` will be
+    goverend by skopos, which shouldn't generally be a problem.
+
+  * Skopos will symlink your cluster `.helm` path to your `$HOME/.helm` --
+    If you manually import a cluster from someone or somewhere, you will
+    need to make the directory structure look like:
+
+```
+    $ alias sk="skopos"
+
+    # create a new home for it...
+    $ sk cr imported
+
+    # copy the kraken cluster tree to new skopos home:
+    $ cp -avp </path/to/kraken-cluster-assets $HOME/<username>/.kraken-imported
+
+```
+
+## Known bugs
+
+Kraken places the `.helm` path for the cluster in `$HOME/user/.kraken/clustername/.helm`
+Skopos links `$HOME/user/.kraken/.helm` to `$HOME/.helm` and sets `$HELM_HOME`
+accordingly. This set up works fine until one wants to `kraken cluster down`. The current
+workaround is:
+
+```
+    $ cd $KRAKEN
+    $ rm .helm
+    $ export HELM_HOME=$KRAKEN/$(basename $(dirname $KUBECONFIG))/.helm
+    $ kraken cluster down
+```
