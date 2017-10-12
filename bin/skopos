@@ -69,7 +69,7 @@ setup_cluster_env()
     alias k='kubectl'
     alias kg='kubectl get -o wide'
     alias k2="kubectl --kubeconfig=$KUBECONFIG"
-    alias k2g="k2 get -o wide"
+    alias k2g="kubectl --kubeconfig=$KUBECONFIG get -o wide"
     alias kssh="ssh -F $KRAKEN/$CLUSTER_NAME/ssh_config " 
 
     if [[ -n "$GLOBAL_HELM" && ! -d $KRAKEN/.helm ]]
