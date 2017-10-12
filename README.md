@@ -175,6 +175,15 @@ it expects certain files and directories to exist to function properly.
 
 ## Known bugs
 
+Currently, `skopos` sets the environment variables for your cluster in the shell 
+in which you run skopos. If you start a new shell, your environment will get properly
+set up in that new shell. If you're in a running shell terminal where you change your 
+cluster environment and then switch to another already running shell terminal, the 
+terminal to which you just switched will still have the old skopos environment variables
+in memory. The workaround for this is to simply run `skopos` once (without args) in the 
+new terminal, which will refresh the env variables. This bug will be fixed in a soon-to-be 
+release.
+
 Kraken places the `.helm` path for the cluster in `$HOME/user/.kraken/clustername/.helm`
 Skopos links `$HOME/user/.kraken/.helm` to `$HOME/.helm` and sets `$HELM_HOME`
 accordingly. This set up works fine until one wants to `kraken cluster down`. The current

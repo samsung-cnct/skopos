@@ -62,7 +62,6 @@ setup_cluster_env()
   if [[ $? == 0 ]]
   then
     cluster_path && \
-            setup_cluster_env
     KUBECONFIG=$KRAKEN/$CLUSTER_NAME/admin.kubeconfig && \
     HELM_HOME=$KRAKEN/$CLUSTER_NAME/.helm && \
     export CLUSTER_NAME KUBECONFIG HELM_HOME 
@@ -171,8 +170,6 @@ skopos_create_env()
     then
       echo "Updated config.yaml with your cluster name: '$new_cfg_loc'"
     fi
-
-    echo "Switched to $new_base. You're all set."
   fi
 }
 
@@ -206,14 +203,9 @@ skopos_list()
   do
     d=${d#*-*}
 
-    if  [[ $(realpath "$KRAKEN") == *.kraken-$d ]]
-    then
-      echo -n ' *  '
-      echo $d
-    else
-      echo -n '    '
-      echo $d
-    fi
+    [[ $(realpath "$KRAKEN") == *.kraken-$d ]] && \
+      echo ' *  '"$d"                          || \
+      echo '    '"$d"
   done
   echo
 }
@@ -348,8 +340,9 @@ skopos()
             set -- "$@"
 
             skopos_create_env $@
-            return
+
             setup_cluster_env
+            echo "Switched to $new_base. You're all set."
             break
           ;;
           delete|d|r|rm|del)
