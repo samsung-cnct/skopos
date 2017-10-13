@@ -129,19 +129,33 @@ skopos_switch()
 
 skopos_create_env()
 {
-  [[ -n "$1" ]] && local new_cfg_loc="$1" || \
-    {
-      echo "switch requires valid environment name"
-      return 70
-    }
-
-  new_base=$KRAKEN-$new_cfg_loc
-
-  if mkdir $new_base
+  if [[ -n "$1" ]]
   then
-    if skopos_switch $new_cfg_loc
+    local new_cfg_loc="$1"
+    new_base=$KRAKEN-$new_cfg_loc
+    shift 2
+  else
+    echo "switch requires valid environment name"
+    return 70
+  fi
+
+  # OK. Now pass arguments from user on to kraken
+  set -- "$@"
+
+  if [[ ! -d $new_base ]]
+  then
+    if mkdir -p $new_base
     then
-      kraken generate
+      echo "Directory: $new_base created successfully"
+    else
+      echo >&2 "Unable to create '$new_base': exit code was $?"
+      return 91
+    fi
+  fi
+
+  if skopos_switch $new_cfg_loc
+  then
+    kraken generate $@
 
 ## I liked the way the following works but it's too complicated
 ## and it rewrites the structure of the config.yaml in such a way
@@ -152,11 +166,9 @@ skopos_create_env()
 ##
 ## So we'll just do it this way.
 
-      sed -ri 's/(^\ +- name:)$/\1 '$new_cfg_loc'/' $KRAKEN/config.yaml
-
-      echo "Created $new_base and switched to it. You're all set."
-    else
-      echo >&2 "Unable to create '$new_base': exit code was $?"
+    if sed -ri 's/(^\ +- name:)$/\1 '$new_cfg_loc'/' $KRAKEN/config.yaml
+    then
+      echo "Updated config.yaml with your cluster name: '$new_cfg_loc'"
     fi
   fi
 }
@@ -191,14 +203,9 @@ skopos_list()
   do
     d=${d#*-*}
 
-    if  [[ $(realpath "$KRAKEN") == *.kraken-$d ]]
-    then
-      echo -n ' *  '
-      echo $d
-    else
-      echo -n '    '
-      echo $d
-    fi
+    [[ $(realpath "$KRAKEN") == *.kraken-$d ]] && \
+      echo ' *  '"$d"                          || \
+      echo '    '"$d"
   done
   echo
 }
@@ -245,6 +252,12 @@ skopos_rm()
     # Reset any env vars
     unset KUBECONFIG HELM_HOME CLUSTER_NAME K2OPTS
 
+    tl;dr
+
+    copy and paste the following after running 'skopos sw <some_other_cluser>':
+
+    rm -rf \$KRAKEN-$env_to_rm && unset KUBECONFIG HELM_HOME CLUSTER_NAME K2OPTS
+
 """
 }
 
@@ -252,7 +265,7 @@ skopos_usage()
 {
   echo """
   Usage: skopos [init <name>] [list] [switch <name>] 
-                [create <name>] [remove <name>] [help]
+                [create <name> [-- kraken args]] [remove <name>] [help]
 
   c|create     : Creates a new skopos env and switches to it.
   i|init       : Initialize new skopos env.
@@ -260,6 +273,16 @@ skopos_usage()
   s|sw|switch  : Switch to kraken environment.
   r|rm|remove  : Explains how to remove an environment.
   h|help       : This message.
+
+  IMPORTANT NOTE:
+
+  The create argument will pass along all additional arguments
+  to kraken when arguments are separated by a '--' IE
+
+  kraken create foo-cluster -- --provider gke
+
+  will create a Kraken GKE cluster config in a newly created
+  'foo-cluster' path.
 
 """
 }
@@ -315,8 +338,11 @@ skopos()
           create|c|cr)
             shift
             set -- "$@"
+
             skopos_create_env $@
+
             setup_cluster_env
+            echo "Switched to $new_base. You're all set."
             break
           ;;
           delete|d|r|rm|del)
