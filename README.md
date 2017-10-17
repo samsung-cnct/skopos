@@ -159,8 +159,8 @@ it expects certain files and directories to exist to function properly.
     goverend by skopos, which shouldn't generally be a problem.
 
   * Skopos will symlink your cluster `.helm` path to your `$HOME/.helm` --
-    If you manually import a cluster from someone or somewhere, you will
-    need to make the directory structure look like:
+    If you manually import a cluster from someone or somewhere, this is 
+    likely the right way to do it:
 
 ```
     $ alias sk="skopos"
@@ -169,9 +169,31 @@ it expects certain files and directories to exist to function properly.
     $ sk cr imported
 
     # copy the kraken cluster tree to new skopos home:
-    $ cp -avp </path/to/kraken-cluster-assets $HOME/<username>/.kraken-imported
+    $ cp -avp /path/to/kraken-cluster-assets $HOME/<username>/.kraken-imported
+```
+
+Your structure should look something like this:
 
 ```
+  ~ $ ls -atr | grep -P '^.kraken'
+  .kraken -> $HOME/.kraken-cyklopsdev   <<-- currently selected cluster
+  .kraken-cyklopsdev
+  .kraken-commontools
+  .kraken-user-default
+  
+  ~ $ cd .kraken
+  
+  ~/.kraken $ ls -altr
+  total 28
+  -rw-r--r--  1 user user 12729 Sep 27 15:12 config.yaml
+  drwxr-xr-x  2 user user  4096 Sep 29 19:24 cyklopsdev
+  lrwxrwxrwx  1 user user    19 Oct  2 21:41 .helm -> /home/user/.helm
+  drwxr-xr-x  3 user user  4096 Oct  2 21:41 .
+  drwxr-xr-x 32 user user  4096 Oct 12 17:41 ..
+```
+
+Skopos determines the name of your cluster by searching the cluster directory
+for a configuration file called 'config.yaml'
 
 ## Known bugs
 
