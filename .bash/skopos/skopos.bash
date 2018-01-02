@@ -63,26 +63,27 @@ setup_cluster_env()
   then
     cluster_path && \
     KUBECONFIG=$KRAKEN/$CLUSTER_NAME/admin.kubeconfig && \
-    HELM_HOME=$KRAKEN/$CLUSTER_NAME/.helm && \
+    HELM_HOME=$KRAKEN/.helm && \
     export CLUSTER_NAME KUBECONFIG HELM_HOME 
 
     alias k='kubectl'
     alias kg='kubectl get -o wide'
     alias k2="kubectl --kubeconfig=$KUBECONFIG"
     alias k2g="kubectl --kubeconfig=$KUBECONFIG get -o wide"
+    alias k2ga="kubectl --kubeconfig=$KUBECONFIG get -o wide --all-namespaces"
     alias kssh="ssh -F $KRAKEN/$CLUSTER_NAME/ssh_config " 
 
-    if [[ -d $KRAKEN/$CLUSTER_NAME ]]
+    if [[ -d $KRAKEN ]]
     then
-      if [[ -n "$GLOBAL_HELM" && ! -d $KRAKEN/$CLUSTER_NAME/.helm ]]
+      if [[ -n "$GLOBAL_HELM" && ! -d $KRAKEN/.helm ]]
       then
   #      echo -e "\nLinking $KRAKEN/.helm to $HOME/.helm"
   #      echo -e "If this is undesirable, run 'rm \$KRAKEN/.helm'\n"
-        ln -sf $GLOBAL_HELM $KRAKEN/$CLUSTER_NAME/
+        ln -sf $GLOBAL_HELM $KRAKEN/
       else
-        if mv $KRAKEN/$CLUSTER_NAME/.helm $KRAKEN/$CLUSTER/dot.helm 2>/dev/null
+        if mv $KRAKEN/.helm $KRAKEN/dot.helm 2>/dev/null
         then
-          if ! ln -sf $GLOBAL_HELM $KRAKEN/$CLUSTER_NAME/
+          if ! ln -sf $GLOBAL_HELM $KRAKEN/
           then
             echo >&2 "Unable to link global .helm to cluster space. mv error code was $?"
           fi
@@ -305,7 +306,7 @@ skopos_usage()
 
 # http://www.biblestudytools.com/lexicons/greek/nas/skopos.html
 ## This is the main function
-skopos_main()
+skopos()
 {
   local prereqs="yaml2json jq ruby"
 
