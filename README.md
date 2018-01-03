@@ -20,7 +20,7 @@ manage multiple clusters.
 
 [Skopos Freek Definition](http://biblehub.com/greek/4649.htm) *σκοπός,
 σκοποῦ, ὁ* ((from a root denoting 'to spy,' 'peer,' 'look into the
-distance'; cf. also Latinspecio, speculum, species, etc.; Fick i., 251f;
+distance'; cf. also Latin specio, speculum, species, etc.; Fick i., 251f;
 iv., 279; Curtius, § 111)); from Homer down;
 
 1. an observer, a watchman.
