@@ -313,8 +313,8 @@ skopos_rm()
 skopos_usage()
 {
   echo """
-  Usage: skopos [init <name>] [list] [switch <name>] [create <name> 
-                [-- kraken args]] [remove <name>] [help] -- <kraken args>
+  Usage: skopos [init <name>] [list] [switch <name>] [create <name>]
+                [remove <name>] [help] [-- [kraken args]]
 
   c|create     : Creates a new skopos env and switches to it.
   i|init       : Initialize new skopos env.
