@@ -81,17 +81,25 @@ setup_cluster_env()
   #      echo -e "If this is undesirable, run 'rm \$KRAKEN/.helm'\n"
         ln -sf $GLOBAL_HELM $KRAKEN/
       else
-        if mv $KRAKEN/.helm $KRAKEN/dot.helm 2>/dev/null
+        if [[ -e $KRAKEN/.helm && ! -L $KRAKEN/.helm ]]
         then
+          if mv $KRAKEN/.helm $KRAKEN/dot.helm 2>/dev/null
+          then
+            if ! ln -sf $GLOBAL_HELM $KRAKEN/
+            then
+              echo >&2 "Unable to link global .helm to cluster space. mv error code was $?"
+            fi
+          else
+            echo >&2 """
+  Your cluster space already has a .helm in it and it could not be moved.
+  mv error code was $?
+            """
+          fi
+        else
           if ! ln -sf $GLOBAL_HELM $KRAKEN/
           then
             echo >&2 "Unable to link global .helm to cluster space. mv error code was $?"
           fi
-        else
-          echo >&2 """
-          Your cluster space already has a .helm in it and it could not be moved.
-          mv error code was $?
-          """
         fi
       fi
     fi
@@ -114,34 +122,54 @@ skopos_switch()
       return 70
     }
 
-  new_base=$(dirname $KRAKEN)/.kraken-$new_cfg_loc
+  local new_base=$(dirname $KRAKEN)/.kraken-$new_cfg_loc
 
   if [[ -d "$new_base" ]]
   then
-    if [[ -L $KRAKEN ]]
+    if rm $KRAKEN 2>/dev/null || true
     then
-      if rm $KRAKEN 2>/dev/null
+      if ln -vsf "$new_base" "$KRAKEN"
       then
-        if ln -vsf "$new_base" "$KRAKEN"
-        then
-          unset INITIAL_CLUSTER_SETUP
-        else
-          xc=$?
-          echo >&2 "Unable to switch config to '$1': ln exit code: $xc"
-          return $xc
-        fi
+        unset INITIAL_CLUSTER_SETUP
       else
-        echo >&2 "Unable to remote old symlink '$KRAKEN', so giving up. Ret code for rm was: $?"
-        return 8
+        echo >&2 "Will not continue. Your kraken env: '$KRAKEN' is not a symlink."
+        return 7
       fi
     else
-      echo >&2 "Will not continue. Your kraken env: '$KRAKEN' is not a symlink."
-      return 7
+      echo >&2 "Unable to remove old symlink '$KRAKEN', so giving up. Ret code for rm was: $?"
+      return 8
     fi
   else
     echo >&2 "the environment '$new_cfg_loc' does not exist"
     return 9
   fi
+}
+
+skopos_cleanup()
+{
+  if [[ ! -f $KRAKEN/config.yaml ]]
+  then
+    echo >&2 """
+ Your Kraken environment exists, but I can't find a valid config.yaml.
+ You may need to create it manually if the 'kraken generate' command
+ did not successfully create it. Sometimes 'kraken generate' hangs when
+ attempting to generate the configuration. To create your config.yaml
+ simply run:
+
+ kraken generate --provider <aws|gcp>
+
+ and then don't forget to edit $KRAKEN/config.yaml to reflect your 
+ necessary requirements. It will need at a minimum the name of your
+ cluster. You can run the following to fix that automatically:
+
+   sed -ri 's/(^\ +- name:)$/\1 $new_cfg_loc/' $KRAKEN/config.yaml
+ """
+ else
+   if sed -ri 's/(^\ +- name:)$/\1 '$new_cfg_loc'/' $KRAKEN/config.yaml
+   then
+     echo "Updated config.yaml with your cluster name: '$new_cfg_loc'"
+   fi
+ fi
 }
 
 skopos_create_env()
@@ -152,12 +180,17 @@ skopos_create_env()
     new_base=$KRAKEN-$new_cfg_loc
     shift 2
   else
-    echo "switch requires valid environment name"
+    echo "skopos_create_env(): requires valid environment name"
     return 70
   fi
 
-  # OK. Now pass arguments from user on to kraken
-  set -- "$@"
+  if [[ $@ =~ -- ]]
+  then
+    # OK. Now pass arguments from user on to kraken
+    set -- "$@"
+  else
+    shift
+  fi
 
   if [[ ! -d $new_base ]]
   then
@@ -172,7 +205,8 @@ skopos_create_env()
 
   if skopos_switch $new_cfg_loc
   then
-    kraken generate $@
+    echo "Now Running: kraken generate $@"
+    kraken generate "$@"
 
 ## I liked the way the following works but it's too complicated
 ## and it rewrites the structure of the config.yaml in such a way
@@ -182,11 +216,7 @@ skopos_create_env()
 #        json2yaml - > $KRAKEN/skopos-$new_cfg_loc.yaml
 ##
 ## So we'll just do it this way.
-
-    if sed -ri 's/(^\ +- name:)$/\1 '$new_cfg_loc'/' $KRAKEN/config.yaml
-    then
-      echo "Updated config.yaml with your cluster name: '$new_cfg_loc'"
-    fi
+    skopos_cleanup
   fi
 }
 
@@ -210,11 +240,13 @@ skopos_list()
   then
     echo >&2 "Skopos doesn't seem to be set up. Please run 'skopos init'"
     skopos_usage
-    return 10
   fi
 
-  echo -e "\nThe following kraken environment(s) exist..."
-  echo -e  "(currently select environment is marked with a '*')\n"
+  if [[ "$KRAKEN-*" ]]
+  then
+    echo -e "\nThe following kraken environment(s) exist..."
+    echo -e  "(currently select environment is marked with a '*')\n"
+  fi
 
   for d in "$KRAKEN-"* 
   do
@@ -281,8 +313,8 @@ skopos_rm()
 skopos_usage()
 {
   echo """
-  Usage: skopos [init <name>] [list] [switch <name>] 
-                [create <name> [-- kraken args]] [remove <name>] [help]
+  Usage: skopos [init <name>] [list] [switch <name>] [create <name> 
+                [-- kraken args]] [remove <name>] [help] -- <kraken args>
 
   c|create     : Creates a new skopos env and switches to it.
   i|init       : Initialize new skopos env.
@@ -308,6 +340,8 @@ skopos_usage()
 ## This is the main function
 skopos()
 {
+  trap "skopos_cleanup" INT
+
   local prereqs="yaml2json jq ruby"
 
   for pr in $prereqs
@@ -354,11 +388,10 @@ skopos()
           ;;
           create|c|cr)
             shift
-            set -- "$@"
 
             skopos_create_env $@
-
             setup_cluster_env
+
             echo "Switched to $new_base. You're all set."
             break
           ;;

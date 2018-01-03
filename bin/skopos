@@ -1,4 +1,4 @@
 #!/bin/bash
 
 source $SKOPOS
-skopos $@
+$HOME/bin/skopos $@

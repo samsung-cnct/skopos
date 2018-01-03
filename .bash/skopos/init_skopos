@@ -9,6 +9,6 @@ then
   echo "Setting up kraken environment"
 
   source $SKOPOS
-  alias sk="skopos"
+  alias sk="$HOME/bin/skopos"
   setup_cluster_env
 fi
