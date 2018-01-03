@@ -1,21 +1,20 @@
 # skopos
 
-## Name
-
-Skopos -- have multiple kraken clusters? This guy will help. Helps
+Have multiple kraken clusters? This guy will help. Helps
 manage multiple clusters.
 
-## Synopsis
+## Usage
 
-Usage: `skopos [init <name>] [list] [switch <name>] [create
-<name>] [remove <name>] [help]`
+`skopos [init <name>] [list] [switch <name>] [create <name>] [remove <name>] [help]`
 
 ## Description
 
-c|create : Creates a new skopos env and switches to it. i|init :
-Initialize new skopos env. l|ls|list : List all kraken environments
-available. s|sw|switch : Switch to kraken environment. r|rm|remove :
-Explains how to remove an environment. h|help : This message.
+- c|create: Creates a new skopos env and switches to it
+- i|init: Initialize new skopos env
+- l|ls|list: List all kraken environments available
+- s|sw|switch: Switch to kraken environment
+- r|rm|remove: Explains how to remove an environment
+- h|help : This message
 
 ## Purpose
 
