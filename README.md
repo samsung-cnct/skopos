@@ -7,8 +7,8 @@ manage multiple clusters.
 
 ## Synopsis
 
-Usage: skopos \[init <name>\] \[list\] \[switch <name>\] \[create
-<name>\] \[remove <name>\] \[help\]
+Usage: `skopos [init <name>] [list] [switch <name>] [create
+<name>] [remove <name>] [help]`
 
 ## Description
 
