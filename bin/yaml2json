@@ -3,16 +3,15 @@
 require 'json'
 require 'yaml'
 
-yaml = ARGV.first or raise ArgumentError, "Please specify a yaml file to parse."
+(yaml = ARGV.first) || raise(ArgumentError, 'Please specify a yaml file to parse.')
 
 begin
   if yaml == '-'
     ydata = ARGF.read.chomp
-    puts JSON.pretty_generate(YAML.load(ydata)).delete('\\')
+    puts JSON.pretty_generate(YAML.safe_load(ydata)).delete('\\')
   else
-    puts JSON.pretty_generate(YAML.load(File.read(yaml).chomp)).delete('\\')
+    puts JSON.pretty_generate(YAML.safe_load(File.read(yaml).chomp)).delete('\\')
   end
-rescue => e
-  $stderr.puts 'Unable to comply: %s' % [e.message]
+rescue StandardError => e
+  warn format('Unable to comply: %s', e.message)
 end
-
