@@ -10,5 +10,6 @@ then
 
   source $SKOPOS
   alias sk="$HOME/bin/skopos"
+  alias skopos="$HOME/bin/skopos"
   setup_cluster_env
 fi
