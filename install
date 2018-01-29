@@ -32,8 +32,19 @@ if [[ $(grep -c "$INSTALLED_STR" "$BASHRC") == 0 ]]; then
   cat <<E >>"$BASHRC"
 
 ## $INSTALLED_STR
-export BASH_SCRIPTS=$HOME/.bash
+BASH_SCRIPTS=$HOME/.bash
+export BASH_SCRIPTS
+
 [[ -e $BASH_SCRIPTS/skopos/skopos.init ]] && source $BASH_SCRIPTS/skopos/skopos.init
+
+if [[ $(echo "$PATH" | grep -c "$HOME"/bin)" == 0 ]]
+then
+  echo >&2 """
+  Your \$PATH does not seem to include $HOME/bin. 
+  You should add $HOME/bin to your \$PATH.
+  """
+fi
+
 ## end install_skopos
 E
 else
