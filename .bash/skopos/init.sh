@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [[ -n $BASH_SCRIPTS ]]; then
-  SKOPOS=$BASH_SCRIPTS/skopos/skopos.bash
+  SKOPOS=$BASH_SCRIPTS/skopos/skopos.sh
   export SKOPOS
 else
   echo >&2 'Cannot set up skopos environment. $BASH_SCRIPTS env var is not set.'
