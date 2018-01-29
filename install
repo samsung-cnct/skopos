@@ -40,7 +40,7 @@ export BASH_SCRIPTS
 if [[ $(echo "$PATH" | grep -c "$HOME"/bin)" == 0 ]]
 then
   echo >&2 """
-  Your \$PATH does not seem to include $HOME/bin. 
+  Your \$PATH does not seem to include $HOME/bin.
   You should add $HOME/bin to your \$PATH.
   """
 fi
