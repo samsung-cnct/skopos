@@ -51,7 +51,7 @@ cluster_path() {
 setup_cluster_env() {
   [[ -d $HOME/.helm ]] && GLOBAL_HELM=$HOME/.helm
 
-    if kraken_env; then
+  if kraken_env; then
     cluster_path &&
       KUBECONFIG=$KRAKEN/$CLUSTER_NAME/admin.kubeconfig &&
       HELM_HOME=$KRAKEN/.helm &&
@@ -163,7 +163,7 @@ skopos_create_env() {
     return 70
   fi
 
-  if [[ "$*" =~ -- ]]; then
+  if [[ $* =~ -- ]]; then
     # OK. Now pass arguments from user on to kraken
     set -- "$@"
   else
