@@ -1,6 +1,12 @@
 #!/bin/bash
 
-export SKOPOS=$BASH_SCRIPTS/skopos/skopos.bash
+if [[ -n $BASH_SCRIPTS ]]; then
+  SKOPOS=$BASH_SCRIPTS/skopos/skopos.bash
+  export SKOPOS
+else
+  echo >&2 'Cannot set up skopos environment. $BASH_SCRIPTS env var is not set.'
+  exit 10
+fi
 
 # Begin Kraken env functions install_skopos
 # test
