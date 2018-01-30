@@ -3,7 +3,7 @@
 require 'json'
 require 'yaml'
 
-json = ARGV.first or raise ArgumentError, "Please specify a json file to parse."
+(json = ARGV.first) || raise(ArgumentError, 'Please specify a json file to parse.')
 
 begin
   if json == '-'
@@ -13,7 +13,6 @@ begin
   else
     puts  YAML.dump(JSON.load(File.read(json).chomp))
   end
-rescue => e
-  $stderr.puts 'Unable to comply: %s' % [e.message]
+rescue StandardError => e
+  warn format('Unable to comply: %s', e.message)
 end
-

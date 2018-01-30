@@ -1,26 +1,22 @@
-#!/bin/sh
+#!/bin/bash
 
 BASHRC="$HOME/.bashrc"
 INSTALLED_STR="installed_skopos"
 BASH_SCRIPTS=$HOME/.bash
 
-if mkdir -p $BASH_SCRIPTS 2>/dev/null
-then
-  if ! cp -avp .bash/ $BASH_SCRIPTS
-  then
+if mkdir -p "$BASH_SCRIPTS" 2>/dev/null; then
+  if ! cp -avp .bash/ "$BASH_SCRIPTS"; then
     echo >&2 "Unable to copy files to $BASH_SCRIPTS"
     exit 8
   fi
 fi
 
 # this mkdir will not clobber
-if mkdir -p $HOME/bin 2>/dev/null
-then
+if mkdir -p "$HOME/bin" 2>/dev/null; then
   # This cp will not clobber any
   # existing files without explicit
   # permission.
-  if cp -iavp bin/* $HOME/bin
-  then
+  if cp -iavp bin/* "$HOME/bin"; then
     echo "Files installed successfully..."
 
   else
@@ -32,13 +28,23 @@ else
   exit 4
 fi
 
-if [[ $(grep -c "$INSTALLED_STR" $BASHRC) == 0 ]]
-then
-  cat <<E >> $BASHRC
+if [[ $(grep -c "$INSTALLED_STR" "$BASHRC") == 0 ]]; then
+  cat <<E >>"$BASHRC"
 
 ## $INSTALLED_STR
-export BASH_SCRIPTS=$HOME/.bash
-[[ -e $BASH_SCRIPTS/skopos/init_skopos ]] && source $BASH_SCRIPTS/skopos/init_skopos
+BASH_SCRIPTS=$HOME/.bash
+export BASH_SCRIPTS
+
+[[ -e $BASH_SCRIPTS/skopos/skopos.init ]] && source $BASH_SCRIPTS/skopos/skopos.init
+
+if [[ $(echo "$PATH" | grep -c "$HOME"/bin)" == 0 ]]
+then
+  echo >&2 """
+  Your \$PATH does not seem to include $HOME/bin.
+  You should add $HOME/bin to your \$PATH.
+  """
+fi
+
 ## end install_skopos
 E
 else
