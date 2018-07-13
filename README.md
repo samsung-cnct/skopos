@@ -1,4 +1,4 @@
-# skopos
+# DEPRECATED: skopos
 
 Have multiple kraken clusters? This guy will help. Helps
 manage multiple clusters.
